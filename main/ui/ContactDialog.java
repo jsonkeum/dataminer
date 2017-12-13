@@ -284,14 +284,18 @@ public class ContactDialog extends JDialog {
 	}
 
 	private void search() {
-		String urlMain = String.format("http://www.google.com/search?q=%s+%s+%s+%s+email", firstName.getText(),
-				lastName.getText(), jobTitle.getText().replaceAll(" ", "+"), company.getText().replaceAll(" ", "+"));
-		String urlCompany = String.format("http://www.google.com/search?q=%s", company.getText().replaceAll(" ", "+"));
+		String urlMain = String.format("http://www.google.com/search?q=%s+%s+%s+%s+email", firstName.getText().trim().replaceAll(" ", "+"),
+				lastName.getText().trim().replaceAll(" ", "+"), jobTitle.getText().trim().replaceAll(" ", "+"),
+				company.getText().trim().replaceAll(" ", "+"));
+		String urlCompany = String.format("http://www.google.com/search?q=%s+email",
+				company.getText().trim().replaceAll(" ", "+"));
 		try {
 			Desktop.getDesktop().browse(URI.create(urlCompany));
 			Desktop.getDesktop().browse(URI.create(urlMain));
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (IllegalArgumentException e2) {
+			JOptionPane.showMessageDialog(null, "Trim the white spaces at the end of company, job title, first name and last name and try again.", "Error", JOptionPane.ERROR_MESSAGE);
+		} catch (Exception e1) {
+			JOptionPane.showMessageDialog(null, e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -300,9 +304,10 @@ public class ContactDialog extends JDialog {
 			String urlExtension = String.format("http://www.google.com/search?q=%s+email", extension.getText().trim());
 			try {
 				Desktop.getDesktop().browse(URI.create(urlExtension));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (IllegalArgumentException e2) {
+				JOptionPane.showMessageDialog(null, "Trim the white spaces at the end of company and try again.", "Error", JOptionPane.ERROR_MESSAGE);
+			} catch (Exception e1) {
+				JOptionPane.showMessageDialog(null, e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 		populateEmailBox();
@@ -317,9 +322,11 @@ public class ContactDialog extends JDialog {
 					lastName.getText().trim().toLowerCase(), extension.getText().trim().toLowerCase()));
 			workEmail.addItem(String.format("%s%s%s", firstName.getText().trim().toLowerCase(),
 					lastName.getText().trim().toLowerCase(), extension.getText().trim().toLowerCase()));
-			workEmail.addItem(String.format("%s.%s%s", firstName.getText().trim().toLowerCase().charAt(0),
-					lastName.getText().trim().toLowerCase(), extension.getText().trim().toLowerCase()));
 			workEmail.addItem(String.format("%s%s%s", firstName.getText().trim().toLowerCase().charAt(0),
+					lastName.getText().trim().toLowerCase(), extension.getText().trim().toLowerCase()));
+			workEmail.addItem(String.format("%s%s%s", firstName.getText().trim().toLowerCase(),
+					lastName.getText().trim().toLowerCase().charAt(0), extension.getText().trim().toLowerCase()));
+			workEmail.addItem(String.format("%s.%s%s", firstName.getText().trim().toLowerCase().charAt(0),
 					lastName.getText().trim().toLowerCase(), extension.getText().trim().toLowerCase()));
 			workEmail.addItem(String.format("%s%s", firstName.getText().trim().toLowerCase(),
 					extension.getText().trim().toLowerCase()));
@@ -345,7 +352,13 @@ public class ContactDialog extends JDialog {
 		city.setText(contact.getCity());
 		province.setText(contact.getProvince());
 		country.setText(contact.getCountry());
-		extension.setText("");
+		if(!website.getText().isEmpty()){
+			String ext = website.getText().replaceFirst("[^\\.]+\\.", "@");
+			extension.setText(ext);
+			populateEmailBox();
+		} else {
+			extension.setText("");
+		}
 	}
 
 }
